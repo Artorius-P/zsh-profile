@@ -1,0 +1,63 @@
+# .aliases - 常用的命令别名
+
+# 导航相关
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+
+# ls 命令强化
+alias ls='ls --color=auto'
+alias ll='ls -lh'
+alias la='ls -lAh'
+alias l='ls -CF'
+
+# grep 命令强化
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+# 文件操作安全措施 - 保持简单且兼容标准 Linux
+alias rm='rm -i'      # 交互式删除，增加一层保护
+alias del='rm -v'     # 显示正在删除的文件
+alias cp='cp -i'      # 交互式复制，防止覆盖
+alias mv='mv -i'      # 交互式移动，防止覆盖
+
+# 系统信息
+alias df='df -h'  # 人类可读的磁盘空间
+alias free='free -m'  # 以 MB 显示内存使用情况
+alias path='echo -e ${PATH//:/\\n}'  # 每行显示一个 PATH 路径
+
+# Git 别名
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
+alias glog='git log --oneline --decorate --graph'
+
+# 网络相关
+alias ping='ping -c 5'  # 默认只 ping 5 次
+
+# 实用工具
+alias h='history'
+alias j='jobs -l'
+alias now='date +"%T"'
+alias today='date +"%Y-%m-%d"'
+
+# 创建父目录 
+alias mkdir='mkdir -pv'
+
+# 编辑器相关
+alias vim='nvim'  # 使用 neovim 作为 vim 命令
+
+# 快速编辑配置文件
+alias ezsh='$EDITOR ~/.zshrc'
+alias ezshrc='$EDITOR ~/.zshrc'
+alias ealias='$EDITOR ~/.aliases'
+
+# 快速重新加载配置
+alias reload='source ~/.zshrc'

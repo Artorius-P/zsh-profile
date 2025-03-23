@@ -1,0 +1,240 @@
+# .zsh_functions - 常用 zsh 函数
+
+#-----------------------------------------------------
+# Python 虚拟环境函数
+#-----------------------------------------------------
+
+# vrun: 激活 Python 虚拟环境并可选择运行命令
+vrun() {
+  local venv_dir="${1:-.venv}"
+  local cmd="$2"
+  
+  if [ ! -d "$venv_dir" ]; then
+    echo "Error: 虚拟环境目录 '$venv_dir' 不存在"
+    echo "用法: vrun [venv目录=.venv] [command]"
+    return 1
+  fi
+
+  # 检查激活脚本
+  local activate_script="$venv_dir/bin/activate"
+  if [ ! -f "$activate_script" ]; then
+    echo "Error: 激活脚本不存在: $activate_script"
+    return 1
+  fi
+
+  # 激活虚拟环境
+  echo "正在激活虚拟环境: $venv_dir"
+  source "$activate_script"
+  
+  # 如果提供了命令，则执行
+  if [ -n "$cmd" ]; then
+    echo "执行命令: $cmd"
+    eval "$cmd"
+  else
+    echo "虚拟环境已激活，使用 'deactivate' 退出"
+  fi
+}
+
+#-----------------------------------------------------
+# 目录和文件操作函数
+#-----------------------------------------------------
+
+# mkcd: 创建目录并进入
+mkcd() {
+  mkdir -p "$1" && cd "$1"
+}
+
+# extract: 一键解压各种归档文件
+extract() {
+  if [ -f $1 ] ; then
+    case $1 in
+      *.tar.bz2)   tar xjf $1     ;;
+      *.tar.gz)    tar xzf $1     ;;
+      *.bz2)       bunzip2 $1     ;;
+      *.rar)       unrar e $1     ;;
+      *.gz)        gunzip $1      ;;
+      *.tar)       tar xf $1      ;;
+      *.tbz2)      tar xjf $1     ;;
+      *.tgz)       tar xzf $1     ;;
+      *.zip)       unzip $1       ;;
+      *.Z)         uncompress $1  ;;
+      *.7z)        7z x $1        ;;
+      *)           echo "'$1' 无法识别的归档文件类型" ;;
+    esac
+  else
+    echo "'$1' 不是有效的文件"
+  fi
+}
+
+#-----------------------------------------------------
+# 代理设置函数
+#-----------------------------------------------------
+
+# proxyon: 启用代理 (HTTP, HTTPS, SOCKS5)
+proxyon() {
+  local proxy_host="127.0.0.1"
+  local proxy_port="7890"
+  
+  # 设置 HTTP 和 HTTPS 代理
+  export http_proxy="http://${proxy_host}:${proxy_port}"
+  export https_proxy="http://${proxy_host}:${proxy_port}"
+  export HTTP_PROXY="$http_proxy"
+  export HTTPS_PROXY="$https_proxy"
+  
+  # 设置 SOCKS5 代理
+  export all_proxy="socks5://${proxy_host}:${proxy_port}"
+  export ALL_PROXY="$all_proxy"
+  
+  # Git 使用代理
+  git config --global http.proxy "http://${proxy_host}:${proxy_port}"
+  git config --global https.proxy "http://${proxy_host}:${proxy_port}"
+  
+  echo "代理已启用:"
+  echo "  HTTP/HTTPS 代理: http://${proxy_host}:${proxy_port}"
+  echo "  SOCKS5 代理: socks5://${proxy_host}:${proxy_port}"
+  
+  # 检查代理是否工作
+  echo "正在测试代理连接..."
+  timeout 5 curl -s https://www.google.com > /dev/null
+  if [ $? -eq 0 ]; then
+    echo "✅ 代理工作正常"
+  else
+    echo "⚠️ 代理可能未正常工作，请检查代理服务是否启动"
+  fi
+}
+
+# proxyoff: 禁用代理
+proxyoff() {
+  # 清除环境变量
+  unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY all_proxy ALL_PROXY
+  
+  # 清除 Git 代理设置
+  git config --global --unset http.proxy
+  git config --global --unset https.proxy
+  
+  echo "所有代理已禁用"
+}
+
+# checkproxy: 检查当前代理状态
+checkproxy() {
+  echo "当前代理设置:"
+  echo "  http_proxy: ${http_proxy:-未设置}"
+  echo "  https_proxy: ${https_proxy:-未设置}"
+  echo "  all_proxy: ${all_proxy:-未设置}"
+  
+  echo "\nGit 代理设置:"
+  git config --get http.proxy || echo "  http.proxy: 未设置"
+  git config --get https.proxy || echo "  https.proxy: 未设置"
+}
+
+#-----------------------------------------------------
+# 系统与网络函数
+#-----------------------------------------------------
+
+# myip: 获取 IP 地址信息，支持多种选项
+# 用法: myip [选项]
+#   无参数: 仅显示本地 IPv4
+#   -4: 显示 IPv4 地址
+#   -6: 显示 IPv6 地址
+#   -l: 显示本地地址 (同时显示 IPv4 和 IPv6)
+#   -p: 显示公网地址
+#   -a: 显示所有地址
+myip() {
+  # 默认值：只显示本地 IPv4
+  local show_ipv4=true
+  local show_ipv6=false
+  local show_local=true
+  local show_public=false
+  
+  # 处理参数
+  if [[ $# -gt 0 ]]; then
+    # 重置默认值
+    show_ipv4=false
+    show_ipv6=false
+    show_local=false
+    show_public=false
+    
+    # 处理每个参数
+    for arg in "$@"; do
+      case "$arg" in
+        -4) show_ipv4=true; show_local=true ;;
+        -6) show_ipv6=true; show_local=true ;;
+        -l) show_local=true; show_ipv4=true; show_ipv6=true ;;  # -l 同时启用 IPv4 和 IPv6
+        -p) show_public=true; show_ipv4=true; show_ipv6=true ;;  # -p 同时启用 IPv4 和 IPv6
+        -a) show_ipv4=true; show_ipv6=true; show_local=true; show_public=true ;;
+        *) echo "未知选项: $arg"; return 1 ;;
+      esac
+    done
+  fi
+  
+  # 获取本地 IPv4
+  if [[ "$show_ipv4" == true && "$show_local" == true ]]; then
+    echo "本地 IPv4 地址:"
+    # 使用更可靠的方式获取每个接口的 IP
+    if command -v ip >/dev/null 2>&1; then
+      ip -4 addr | grep 'inet ' | grep -v ' 127.' | awk '{print "  "$2" - "substr($NF, 1)}' | sed 's/\/[0-9]*//g'
+    else
+      ifconfig | grep -E 'inet (addr:)?' | grep -v '127.0.0.1' | awk '{print "  "$2}' | sed 's/addr://g'
+    fi
+  fi
+  
+  # 获取公网 IPv4
+  if [[ "$show_ipv4" == true && "$show_public" == true ]]; then
+    echo "公网 IPv4: $(curl -s -4 https://api.ipify.org 2>/dev/null || echo '获取失败')"
+  fi
+  
+  # 获取本地 IPv6
+  if [[ "$show_ipv6" == true && "$show_local" == true ]]; then
+    echo "本地 IPv6 地址:"
+    if command -v ip >/dev/null 2>&1; then
+      ip -6 addr | grep 'inet6 ' | grep -v ' ::1' | awk '{print "  "$2" - "substr($NF, 1)}' | sed 's/\/[0-9]*//g'
+    else
+      ifconfig | grep -E 'inet6 (addr:)?' | grep -v '::1' | awk '{print "  "$2}' | sed 's/addr://g'
+    fi
+  fi
+  
+  # 获取公网 IPv6
+  if [[ "$show_ipv6" == true && "$show_public" == true ]]; then
+    echo "公网 IPv6: $(curl -s -6 https://api64.ipify.org 2>/dev/null || echo '获取失败或无 IPv6 连接')"
+  fi
+}
+
+# 为 myip 添加自动补全
+_myip_complete() {
+  local -a options
+  options=(
+    '-4:仅显示 IPv4 地址'
+    '-6:仅显示 IPv6 地址'
+    '-l:显示本地地址 (IPv4 和 IPv6)'
+    '-p:显示公网地址 (IPv4 和 IPv6)'
+    '-a:显示所有地址'
+  )
+  _describe 'myip options' options
+}
+
+# 注册自动补全
+compdef _myip_complete myip
+
+# 注册自动补全
+compdef _myip_complete myip
+
+# 快速启动 HTTP 服务器来分享当前目录
+serve() {
+  local port="${1:-8000}"
+  echo "在端口 $port 开启 HTTP 服务器"
+  python3 -m http.server "$port"
+}
+
+#-----------------------------------------------------
+# Git 相关函数
+#-----------------------------------------------------
+
+# gitlog: 简化版的 git log 视图
+gitlog() {
+  git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+}
+
+# gitclean: 清理分支
+gitclean() {
+  git branch --merged | grep -v "\*" | grep -v master | grep -v main | xargs -n 1 git branch -d
+}
