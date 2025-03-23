@@ -30,9 +30,10 @@ setopt PUSHD_SILENT         # pushd 和 popd 不打印目录栈
 # 加载 zsh-autosuggestions 插件
 if [ -f $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
   source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-  # 自定义 zsh-autosuggestions 设置
-  zstyle ':autocomplete:*' min-input 1           # 只需输入一个字符就开始自动补全
-  zstyle ':autocomplete:*' insert-unambiguous no  # 不自动插入无歧义前缀
+    # 自定义 zsh-autosuggestions 设置
+  ZSH_AUTOSUGGEST_STRATEGY=(history completion)  # 使用历史记录和补全作为建议来源
+  ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20             # 限制缓冲区大小以提高性能
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#8f8f8f"   # 建议文本的颜色
 fi
 
 # 加载 starship 提示符
