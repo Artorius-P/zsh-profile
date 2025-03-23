@@ -61,3 +61,7 @@ alias ealias='$EDITOR ~/.aliases'
 
 # 快速重新加载配置
 alias reload='source ~/.zshrc'
+
+# Python开发
+alias py=python3
+alias python=python3
