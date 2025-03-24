@@ -9,6 +9,7 @@
 ```bash
 brew install starship
 brew install zsh-autosuggestions
+brew install expect
 ```
 
 创建了一个安装脚本，这个脚本具有以下特点：
