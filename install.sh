@@ -113,15 +113,10 @@ setup_custom_features() {
 
 # 主函数
 main() {
-    print_info "ZSH配置安装脚本开始执行..."
-    
-    # 询问用户是否继续
-    print_info "此脚本将安装zsh配置文件，并备份现有配置。是否继续? [Y/n]"
-    read -r response
-    if [[ ! "$response" =~ ^([yY][eE][sS]|[yY]|)$ ]]; then
-        print_info "已取消安装"
-        exit 0
-    fi
+     # 询问用户是否继续
+    print_info "此脚本将安装zsh配置文件，并备份现有配置。按任意键继续，按Ctrl+C取消..."
+    read -n 1 -s
+    echo ""  # 添加一个换行   
     
     # 执行安装步骤
     backup_configs
