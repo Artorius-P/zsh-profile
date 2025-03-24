@@ -95,7 +95,7 @@ proxyon() {
   
   # 检查代理是否工作
   echo "正在测试代理连接..."
-  timeout 5 curl -s https://www.google.com > /dev/null
+  expect -c "set timeout 5; spawn curl -s https://www.google.com -o /dev/null; expect eof; catch wait result; exit [lindex \$result 3]" > /dev/null
   if [ $? -eq 0 ]; then
     echo "✅ 代理工作正常"
   else
