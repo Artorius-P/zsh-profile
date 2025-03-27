@@ -1,3 +1,13 @@
+# pnpm
+export PNPM_HOME="/Users/artorius/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# === 由安装脚本添加于 Mon Mar 24 08:43:01 CST 2025 ===
+
 # .zshrc - 基本轻量级配置
 
 # 历史记录设置
@@ -16,11 +26,15 @@ setopt INTERACTIVE_COMMENTS  # 允许交互模式中的注释
 
 # 补全系统设置
 autoload -Uz compinit && compinit
+
 zstyle ':completion:*' menu select                # 菜单式补全
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' # 忽略大小写
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*' # 忽略大小写
 zstyle ':completion:*' rehash true               # 自动更新PATH中的命令
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}" # 使用 LS_COLORS 给补全结果上色
 zstyle ':completion:*' verbose yes               # 提供详细的补全信息
+
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/artorius/.docker/completions $fpath)
 
 # 目录栈功能
 setopt AUTO_PUSHD           # 自动将目录加入目录栈
@@ -56,4 +70,5 @@ export EDITOR='nvim'  # 设置默认编辑器
 
 # PATH 设置
 # 添加自定义路径到 PATH (根据需要修改)
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+source $HOME/bin/zsh_script.sh
